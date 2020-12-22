@@ -19,27 +19,28 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	"github.com/k0sproject/k0s/internal/util"
 	"github.com/pkg/errors"
 	"gopkg.in/yaml.v2"
-
-	"github.com/k0sproject/k0s/internal/util"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// ClusterConfig cluster manifest
+// ClusterConfig details the cluster configurations spec
 type ClusterConfig struct {
-	APIVersion string             `yaml:"apiVersion" validate:"eq=k0s.k0sproject.io/v1beta1"`
-	Extensions *ClusterExtensions `yaml:"extensions,omitempty"`
-	Images     *ClusterImages     `yaml:"images"`
-	Install    *InstallSpec       `yaml:"installConfig,omitempty"`
-	Kind       string             `yaml:"kind" validate:"eq=Cluster"`
-	Metadata   *ClusterMeta       `yaml:"metadata"`
-	Spec       *ClusterSpec       `yaml:"spec"`
-	Telemetry  *ClusterTelemetry  `yaml:"telemetry"`
+	v1.ObjectMeta `yaml:"metadata"`
+	v1.TypeMeta   `yaml:",inline"`
+	APIVersion    string              `yaml:"apiVersion" validate:"eq=k0s.k0sproject.io/v1beta1"`
+	Extensions    *ClusterExtensions  `yaml:"extensions,omitempty"`
+	Images        *ClusterImages      `yaml:"images"`
+	Install       *InstallSpec        `yaml:"installConfig,omitempty"`
+	Spec          *ClusterSpec        `yaml:"spec"`
+	Status        ClusterConfigStatus `yaml:"status,omitempty"`
+	Telemetry     *ClusterTelemetry   `yaml:"telemetry"`
 }
 
-// ClusterMeta ...
-type ClusterMeta struct {
-	Name string `yaml:"name" validate:"required"`
+type ClusterConfigStatus struct {
+	State   string `json:"state,omitempty"`
+	Message string `json:"message,omitempty"`
 }
 
 // ClusterSpec ...
@@ -139,8 +140,10 @@ func FromYaml(filename string) (*ClusterConfig, error) {
 func DefaultClusterConfig() *ClusterConfig {
 	return &ClusterConfig{
 		APIVersion: "k0s.k0sproject.io/v1beta1",
-		Kind:       "Cluster",
-		Metadata: &ClusterMeta{
+		TypeMeta: v1.TypeMeta{
+			Kind: "Cluster",
+		},
+		ObjectMeta: v1.ObjectMeta{
 			Name: "k0s",
 		},
 		Install:   DefaultInstallSpec(),
@@ -152,8 +155,10 @@ func DefaultClusterConfig() *ClusterConfig {
 
 // UnmarshalYAML sets in some sane defaults when unmarshaling the data from yaml
 func (c *ClusterConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
-	c.Kind = "Cluster"
-	c.Metadata = &ClusterMeta{
+	c.TypeMeta = v1.TypeMeta{
+		Kind: "Cluster",
+	}
+	c.ObjectMeta = v1.ObjectMeta{
 		Name: "k0s",
 	}
 	c.Spec = DefaultClusterSpec()

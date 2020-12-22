@@ -27,8 +27,8 @@ import (
 func TestClusterDefaults(t *testing.T) {
 	c, err := fromYaml(t, "apiVersion: k0s.k0sproject.io/v1beta1")
 	assert.NoError(t, err)
-	assert.NotNil(t, c.Metadata)
-	assert.Equal(t, "k0s", c.Metadata.Name)
+	assert.NotNil(t, c.ObjectMeta)
+	assert.Equal(t, "k0s", c.ObjectMeta.Name)
 	assert.Equal(t, DefaultStorageSpec(), c.Spec.Storage)
 }
 
