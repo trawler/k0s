@@ -55,6 +55,9 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&dataDir, "data-dir", "", "Data Directory for k0s (default: /var/lib/k0s). DO NOT CHANGE for an existing setup, things will break!")
 	rootCmd.PersistentFlags().StringVar(&debugListenOn, "debugListenOn", ":6060", "Http listenOn for debug pprof handler")
 
+	// Get relevant Vars from constant package
+	k0sVars = constant.GetConfig(dataDir)
+
 	addPersistentFlags(rootCmd)
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(configCmd)
@@ -97,9 +100,6 @@ var (
 
 			// Set logging
 			logging = setLogging(cmdLogLevels)
-
-			// Get relevant Vars from constant package
-			k0sVars = constant.GetConfig(dataDir)
 		},
 	}
 
