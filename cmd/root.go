@@ -19,14 +19,32 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"gopkg.in/yaml.v2"
 
+	"github.com/k0sproject/k0s/cmd/api"
+	"github.com/k0sproject/k0s/cmd/controller"
+	"github.com/k0sproject/k0s/cmd/etcd"
+	"github.com/k0sproject/k0s/cmd/install"
+	"github.com/k0sproject/k0s/cmd/kubeconfig"
+	"github.com/k0sproject/k0s/cmd/kubectl"
+	"github.com/k0sproject/k0s/cmd/reset"
+	"github.com/k0sproject/k0s/cmd/status"
+	"github.com/k0sproject/k0s/cmd/token"
+	"github.com/k0sproject/k0s/cmd/validate"
+	"github.com/k0sproject/k0s/cmd/worker"
+
+	"github.com/k0sproject/k0s/internal/util"
+
+	"github.com/k0sproject/k0s/pkg/apis/v1beta1"
 	"github.com/k0sproject/k0s/pkg/build"
+	"github.com/k0sproject/k0s/pkg/config"
 	"github.com/k0sproject/k0s/pkg/constant"
 )
 
@@ -58,22 +76,34 @@ func init() {
 	// Get relevant Vars from constant package
 	k0sVars = constant.GetConfig(dataDir)
 
-	addPersistentFlags(rootCmd)
+	opts := config.CLIOptions{
+		CfgFile:          cfgFile,
+		Debug:            debug,
+		DefaultLogLevels: defaultLogLevels,
+		Flagset:          getPersistentFlagSet(),
+		K0sVars:          k0sVars,
+	}
+
+	rootCmd.AddCommand(api.NewApiCmd(api.CmdOpts(opts)))
+	rootCmd.AddCommand(controller.NewControllerCmd(controller.CmdOpts(opts)))
+	rootCmd.AddCommand(etcd.NewEtcdCmd(etcd.CmdOpts(opts)))
+	rootCmd.AddCommand(install.NewInstallCmd(install.CmdOpts(opts)))
+	rootCmd.AddCommand(token.NewTokenCmd(token.CmdOpts(opts)))
+	rootCmd.AddCommand(worker.NewWorkerCmd(worker.CmdOpts(opts)))
+	rootCmd.AddCommand(reset.NewResetCmd(reset.CmdOpts(opts)))
+	rootCmd.AddCommand(status.NewStatusCmd(status.CmdOpts(opts)))
+	rootCmd.AddCommand(validate.NewValidateCmd(validate.CmdOpts(opts)))
+	rootCmd.AddCommand(kubeconfig.NewKubeConfigCmd(kubeconfig.CmdOpts(opts)))
+	rootCmd.AddCommand(kubectl.NewK0sKubectlCmd(kubectl.CmdOpts(opts)))
+
 	rootCmd.AddCommand(versionCmd)
 	rootCmd.AddCommand(configCmd)
-	rootCmd.AddCommand(tokenCmd)
-	rootCmd.AddCommand(controllerCmd)
-	rootCmd.AddCommand(workerCmd)
-	rootCmd.AddCommand(APICmd)
-	rootCmd.AddCommand(etcdCmd)
 	rootCmd.AddCommand(docs)
-	rootCmd.AddCommand(kubeconfigCmd)
-	rootCmd.AddCommand(installCmd)
 	rootCmd.AddCommand(completionCmd)
-	rootCmd.AddCommand(statusCmd)
-	rootCmd.AddCommand(validateCmd)
-	rootCmd.AddCommand(kubectlCmd)
-	rootCmd.AddCommand(resetCmd)
+
+	// Add persistent Flags
+	rootCmd.Flags().AddFlagSet(opts.Flagset)
+
 	rootCmd.DisableAutoGenTag = true
 	longDesc = "k0s - The zero friction Kubernetes - https://k0sproject.io"
 	if build.EulaNotice != "" {
@@ -99,7 +129,7 @@ var (
 			}
 
 			// Set logging
-			logging = setLogging(cmdLogLevels)
+			logging = util.MapMerge(cmdLogLevels, defaultLogLevels)
 		},
 	}
 
@@ -123,7 +153,72 @@ var (
 			return nil
 		},
 	}
+	configCmd = &cobra.Command{
+		Use:   "default-config",
+		Short: "Output the default k0s configuration yaml to stdout",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			if err := buildConfig(); err != nil {
+				return err
+			}
+			return nil
+		},
+	}
+
+	completionCmd = &cobra.Command{
+		Use:   "completion [bash|zsh|fish|powershell]",
+		Short: "Generate completion script",
+		Long: `To load completions:
+
+Bash:
+
+$ source <(k0s completion bash)
+
+# To load completions for each session, execute once:
+  $ k0s completion bash > /etc/bash_completion.d/k0s
+
+Zsh:
+
+# If shell completion is not already enabled in your environment you will need
+# to enable it.  You can execute the following once:
+
+$ echo "autoload -U compinit; compinit" >> ~/.zshrc
+
+# To load completions for each session, execute once:
+$ k0s completion zsh > "${fpath[1]}/_k0s"
+
+# You will need to start a new shell for this setup to take effect.
+
+Fish:
+
+$ k0s completion fish | source
+
+# To load completions for each session, execute once:
+$ k0s completion fish > ~/.config/fish/completions/k0s.fish
+`,
+		DisableFlagsInUseLine: true,
+		ValidArgs:             []string{"bash", "zsh", "fish", "powershell"},
+		Args:                  cobra.ExactValidArgs(1),
+		RunE: func(cmd *cobra.Command, args []string) error {
+			switch args[0] {
+			case "bash":
+				return cmd.Root().GenBashCompletion(os.Stdout)
+			case "zsh":
+				return cmd.Root().GenZshCompletion(os.Stdout)
+			case "fish":
+				return cmd.Root().GenFishCompletion(os.Stdout, true)
+			case "powershell":
+				return cmd.Root().GenPowerShellCompletion(os.Stdout)
+			}
+			return nil
+		},
+	}
 )
+
+func buildConfig() error {
+	conf, _ := yaml.Marshal(v1beta1.DefaultClusterConfig())
+	fmt.Print(string(conf))
+	return nil
+}
 
 func generateDocs() error {
 	if err := doc.GenMarkdownTree(rootCmd, "./docs/cli"); err != nil {
@@ -132,19 +227,11 @@ func generateDocs() error {
 	return nil
 }
 
-// setLogging merges the input from the command flag with the default log levels, so that a user can override just one single component
-func setLogging(inputLogs map[string]string) map[string]string {
-	for k := range inputLogs {
-		defaultLogLevels[k] = inputLogs[k]
-	}
-	return defaultLogLevels
-}
-
-func addPersistentFlags(cmd *cobra.Command) {
+func getPersistentFlagSet() *pflag.FlagSet {
 	flagset := &pflag.FlagSet{}
 	flagset.StringVarP(&cfgFile, "config", "c", "", "config file (default: ./k0s.yaml)")
 	flagset.BoolVarP(&debug, "debug", "d", false, "Debug logging (default: false)")
-	cmd.Flags().AddFlagSet(flagset)
+	return flagset
 }
 
 func Execute() {

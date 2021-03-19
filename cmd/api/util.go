@@ -13,18 +13,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package cmd
+package api
 
 import (
-	"github.com/k0sproject/k0s/pkg/apis/v1beta1"
-	"github.com/k0sproject/k0s/pkg/config"
+	"net/http"
+
+	"github.com/sirupsen/logrus"
 )
 
-// ConfigFromYaml returns given k0s config or default config
-func ConfigFromYaml(cfgPath string) (clusterConfig *v1beta1.ClusterConfig, err error) {
-	cfg, err := config.ValidateYaml(cfgFile, k0sVars.DataDir)
-	if err != nil {
-		return nil, err
+func sendError(err error, resp http.ResponseWriter, status ...int) {
+	code := http.StatusInternalServerError
+	if len(status) == 1 {
+		code = status[0]
 	}
-	return cfg, nil
+
+	logrus.Error(err)
+	resp.Header().Set("Content-Type", "text/plain")
+	resp.WriteHeader(code)
+	if _, err := resp.Write([]byte(err.Error())); err != nil {
+		sendError(err, resp)
+		return
+	}
 }

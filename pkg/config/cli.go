@@ -13,18 +13,25 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package cmd
+package config
 
 import (
+	"github.com/spf13/pflag"
+	k8s "k8s.io/client-go/kubernetes"
+
 	"github.com/k0sproject/k0s/pkg/apis/v1beta1"
-	"github.com/k0sproject/k0s/pkg/config"
+	"github.com/k0sproject/k0s/pkg/constant"
 )
 
-// ConfigFromYaml returns given k0s config or default config
-func ConfigFromYaml(cfgPath string) (clusterConfig *v1beta1.ClusterConfig, err error) {
-	cfg, err := config.ValidateYaml(cfgFile, k0sVars.DataDir)
-	if err != nil {
-		return nil, err
-	}
-	return cfg, nil
+// This struct holds all the CLI options & settings required by the
+// different k0s sub-commands
+type CLIOptions struct {
+	CfgFile          string
+	ClusterConfig    *v1beta1.ClusterConfig
+	Debug            bool
+	DefaultLogLevels map[string]string
+	Flagset          *pflag.FlagSet
+	K0sVars          constant.CfgVars
+	KubeClient       k8s.Interface
+	Logging          map[string]string // merged outcome of default log levels and cmdLoglevels
 }
