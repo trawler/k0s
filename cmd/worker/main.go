@@ -76,6 +76,7 @@ func NewWorkerCmd(c CmdOpts) *cobra.Command {
 				}
 				tokenArg = string(bytes)
 			}
+			cmd.SilenceUsage = true
 			return c.startWorker(tokenArg)
 		},
 	}

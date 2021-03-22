@@ -42,6 +42,7 @@ func NewResetCmd(c CmdOpts) *cobra.Command {
 		},
 		PreRunE: c.preRunValidateConfig,
 	}
+	cmd.SilenceUsage = true
 	return cmd
 }
 

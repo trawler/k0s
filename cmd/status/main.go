@@ -75,7 +75,7 @@ func NewStatusCmd(c CmdOpts) *cobra.Command {
 			return nil
 		},
 	}
-
+	cmd.SilenceUsage = true
 	cmd.PersistentFlags().StringVarP(&output, "out", "o", "", "sets type of out put to json or yaml")
 	return cmd
 }

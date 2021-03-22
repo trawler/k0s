@@ -93,6 +93,7 @@ func NewControllerCmd(c CmdOpts) *cobra.Command {
 			}
 
 			c.ClusterConfig = cfg
+			cmd.SilenceUsage = true
 			return c.startController(controllerToken)
 		},
 	}

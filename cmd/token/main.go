@@ -36,6 +36,7 @@ func NewTokenCmd(c CmdOpts) *cobra.Command {
 		Short: "Manage join tokens",
 	}
 
+	cmd.SilenceUsage = true
 	cmd.AddCommand(tokenCreateCmd(c))
 	cmd.AddCommand(tokenListCmd(c))
 	cmd.AddCommand(tokenInvalidateCmd(c))

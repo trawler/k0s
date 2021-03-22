@@ -30,6 +30,7 @@ func NewValidateCmd(c CmdOpts) *cobra.Command {
 		Short: "Helper command for validating the config file",
 	}
 	cmd.AddCommand(validateConfigCmd(c))
+	cmd.SilenceUsage = true
 	return cmd
 }
 

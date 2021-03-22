@@ -31,6 +31,7 @@ func NewKubeConfigCmd(c CmdOpts) *cobra.Command {
 			return createCmd.Usage()
 		},
 	}
+	cmd.SilenceUsage = true
 	cmd.AddCommand(kubeconfigCreateCmd(c))
 	cmd.AddCommand(kubeConfigAdminCmd(c))
 	return cmd

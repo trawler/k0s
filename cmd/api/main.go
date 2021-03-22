@@ -67,6 +67,7 @@ func NewApiCmd(c CmdOpts) *cobra.Command {
 			return c.startAPI()
 		},
 	}
+	cmd.SilenceUsage = true
 	cmd.Flags().AddFlagSet(c.Flagset)
 	return cmd
 }
