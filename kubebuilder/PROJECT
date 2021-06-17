@@ -1,0 +1,14 @@
+domain: k0s.k0sproject.io
+layout:
+- go.kubebuilder.io/v3
+projectName: kubebuilder
+repo: k0s_kubebuilder
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: k0s.k0sproject.io
+  kind: ClusterConfig
+  path: k0s_kubebuilder/api/v1beta1
+  version: v1beta1
+version: "3"

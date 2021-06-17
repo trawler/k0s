@@ -1,0 +1,7 @@
+apiVersion: k0s.k0sproject.io/v1beta1
+kind: ClusterConfig
+metadata:
+  name: clusterconfig-sample
+spec:
+  # Add fields here
+  foo: bar

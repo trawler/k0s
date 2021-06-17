@@ -1,5 +1,5 @@
 /*
-Copyright 2021 k0s authors
+Copyright 2021.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package v1beta1
 
 import (
@@ -22,25 +23,15 @@ import (
 
 	"github.com/k0sproject/k0s/pkg/constant"
 	"gopkg.in/yaml.v2"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// ClusterConfig cluster manifest
-type ClusterConfig struct {
-	APIVersion string       `yaml:"apiVersion" validate:"eq=k0s.k0sproject.io/v1beta1"`
-	Kind       string       `yaml:"kind" validate:"eq=Cluster"`
-	Metadata   *ClusterMeta `yaml:"metadata"`
-	Spec       *ClusterSpec `yaml:"spec"`
-	k0sVars    constant.CfgVars
-}
+// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
+// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// ClusterMeta ...
-type ClusterMeta struct {
-	Name string `yaml:"name" validate:"required"`
-}
-
-// ClusterSpec ...
+// ClusterSpec defines the desired state of ClusterConfig
 type ClusterSpec struct {
-	API               *APISpec               `yaml:"api"`
+	API               *K0sAPISpec            `yaml:"api"`
 	ControllerManager *ControllerManagerSpec `yaml:"controllerManager,omitempty"`
 	Scheduler         *SchedulerSpec         `yaml:"scheduler,omitempty"`
 	Storage           *StorageSpec           `yaml:"storage"`
@@ -52,6 +43,41 @@ type ClusterSpec struct {
 	Images            *ClusterImages         `yaml:"images"`
 	Extensions        *ClusterExtensions     `yaml:"extensions,omitempty"`
 	Konnectivity      *KonnectivitySpec      `yaml:"konnectivity,omitempty"`
+}
+
+// ClusterConfigStatus defines the observed state of ClusterConfig
+type ClusterConfigStatus struct {
+	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+	// Important: Run "make" to regenerate code after modifying this file
+}
+
+//+kubebuilder:object:root=true
+//+kubebuilder:subresource:status
+
+// ClusterConfig is the Schema for the clusterconfigs API
+type ClusterConfig struct {
+	APIVersion string `yaml:"apiVersion" validate:"eq=k0s.k0sproject.io/v1beta1"`
+	Kind       string `yaml:"kind" validate:"eq=Cluster"`
+
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Spec    *ClusterSpec        `json:"spec,omitempty"`
+	Status  ClusterConfigStatus `json:"status,omitempty"`
+	k0sVars constant.CfgVars
+}
+
+//+kubebuilder:object:root=true
+
+// ClusterConfigList contains a list of ClusterConfig
+type ClusterConfigList struct {
+	metav1.TypeMeta `json:",inline"`
+	metav1.ListMeta `json:"metadata,omitempty"`
+	Items           []ClusterConfig `json:"items"`
+}
+
+func init() {
+	SchemeBuilder.Register(&ClusterConfig{}, &ClusterConfigList{})
 }
 
 var _ Validateable = (*ControllerManagerSpec)(nil)
@@ -144,7 +170,6 @@ func ConfigFromStdin(k0sVars constant.CfgVars) (*ClusterConfig, error) {
 		return nil, fmt.Errorf("can't read configration from stdin: %v", err)
 	}
 	return configFromString(string(input), k0sVars)
-
 }
 
 func configFromString(yml string, k0sVars constant.CfgVars) (*ClusterConfig, error) {
@@ -166,19 +191,15 @@ func DefaultClusterConfig(k0sVars constant.CfgVars) *ClusterConfig {
 	return &ClusterConfig{
 		APIVersion: "k0s.k0sproject.io/v1beta1",
 		Kind:       "Cluster",
-		Metadata: &ClusterMeta{
-			Name: "k0s",
-		},
-		Spec: DefaultClusterSpec(k0sVars),
+		ObjectMeta: metav1.ObjectMeta{ClusterName: "k0s"},
+		Spec:       DefaultClusterSpec(k0sVars),
 	}
 }
 
 // UnmarshalYAML sets in some sane defaults when unmarshaling the data from yaml
 func (c *ClusterConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
 	c.Kind = "Cluster"
-	c.Metadata = &ClusterMeta{
-		Name: "k0s",
-	}
+	c.ClusterName = "k0s"
 	c.Spec = DefaultClusterSpec(c.k0sVars)
 
 	type yclusterconfig ClusterConfig
