@@ -103,7 +103,7 @@ func (s *StorageSpec) Validate() []error {
 // EtcdConfig defines etcd related config options
 type EtcdConfig struct {
 	// Node address used for etcd cluster peering
-	PeerAddress string `json:"peerAddress"`
+	PeerAddress string `json:"peerAddress" yaml:"peerAddress"`
 }
 
 // DefaultEtcdConfig creates EtcdConfig with sane defaults

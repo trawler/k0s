@@ -21,9 +21,9 @@ package v1beta1
 // KonnectivitySpec defines the requested state for Konnectivity
 type KonnectivitySpec struct {
 	// agent port to listen on (default 8132)
-	AgentPort int64 `json:"agentPort,omitempty"`
+	AgentPort int64 `json:"agentPort,omitempty" yaml:"agentPort,omitempty"`
 	// admin port to listen on (default 8133)
-	AdminPort int64 `json:"adminPort,omitempty"`
+	AdminPort int64 `json:"adminPort,omitempty" yaml:"adminPort,omitempty"`
 }
 
 // DefaultKonnectivitySpec builds default KonnectivitySpec

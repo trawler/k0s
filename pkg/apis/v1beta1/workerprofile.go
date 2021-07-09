@@ -16,8 +16,9 @@ limitations under the License.
 package v1beta1
 
 import (
-	"encoding/json"
 	"fmt"
+
+	"gopkg.in/yaml.v2"
 )
 
 // var _ Validateable = (*WorkerProfiles)(nil)
@@ -37,18 +38,39 @@ func (wps WorkerProfiles) Validate() []error {
 }
 
 // WorkerProfile worker profile
+// +k8s:deepcopy-gen=false
 type WorkerProfile struct {
 	// String; name to use as profile selector for the worker process
-	Name string `json:"name"`
+	Name string `json:"name" yaml:"name"`
 	// Worker Mapping object
-	Values map[string]json.RawMessage `json:"values"`
+	Values `json:"values" yaml:"values"`
 }
+
+type Values map[string]interface{}
 
 var lockedFields = map[string]struct{}{
 	"clusterDNS":    {},
 	"clusterDomain": {},
 	"apiVersion":    {},
 	"kind":          {},
+}
+
+func (in *WorkerProfile) DeepCopyInto(out *WorkerProfile) {
+	if in == nil {
+		return
+	}
+
+	b, err := yaml.Marshal(in.Values)
+	if err != nil {
+		return
+	}
+	var values Values
+
+	err = yaml.Unmarshal(b, &values)
+	if err != nil {
+		return
+	}
+	out.Values = values
 }
 
 // Validate validates instance

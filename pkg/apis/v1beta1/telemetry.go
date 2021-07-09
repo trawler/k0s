@@ -4,7 +4,7 @@ package v1beta1
 
 // ClusterTelemetry holds telemetry related settings
 type ClusterTelemetry struct {
-	Enabled bool `json:"enabled"`
+	Enabled bool `json:"enabled" yaml:"enabled"`
 }
 
 // DefaultClusterTelemetry default settings

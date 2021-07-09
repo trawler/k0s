@@ -32,18 +32,18 @@ import (
 
 // ClusterSpec defines the desired state of ClusterConfig
 type ClusterSpec struct {
-	API               *APISpec               `json:"api"`
-	ControllerManager *ControllerManagerSpec `json:"controllerManager,omitempty"`
-	Scheduler         *SchedulerSpec         `json:"scheduler,omitempty"`
-	Storage           *StorageSpec           `json:"storage"`
-	Network           *Network               `json:"network"`
-	PodSecurityPolicy *PodSecurityPolicy     `json:"podSecurityPolicy"`
-	WorkerProfiles    WorkerProfiles         `json:"workerProfiles,omitempty"`
-	Telemetry         *ClusterTelemetry      `json:"telemetry"`
-	Install           *InstallSpec           `json:"installConfig,omitempty"`
-	Images            *ClusterImages         `json:"images"`
-	Extensions        *ClusterExtensions     `json:"extensions,omitempty"`
-	Konnectivity      *KonnectivitySpec      `json:"konnectivity,omitempty"`
+	API               *APISpec               `json:"api" yaml:"api"`
+	ControllerManager *ControllerManagerSpec `json:"controllerManager,omitempty" yaml:"controllerManager,omitempty"`
+	Scheduler         *SchedulerSpec         `json:"scheduler,omitempty" yaml:"scheduler,omitempty"`
+	Storage           *StorageSpec           `json:"storage" yaml:"storage"`
+	Network           *Network               `json:"network" yaml:"network"`
+	PodSecurityPolicy *PodSecurityPolicy     `json:"podSecurityPolicy" yaml:"podSecurityPolicy"`
+	WorkerProfiles    WorkerProfiles         `json:"workerProfiles,omitempty" yaml:"workerProfiles,omitempty"`
+	Telemetry         *ClusterTelemetry      `json:"telemetry" yaml:"telemetry"`
+	Install           *InstallSpec           `json:"installConfig,omitempty" yaml:"installConfig,omitempty"`
+	Images            *ClusterImages         `json:"images" yaml:"images"`
+	Extensions        *ClusterExtensions     `json:"extensions,omitempty" yaml:"extensions,omitempty"`
+	Konnectivity      *KonnectivitySpec      `json:"konnectivity,omitempty" yaml:"konnectivity,omitempty"`
 }
 
 // ClusterConfigStatus defines the observed state of ClusterConfig
@@ -57,31 +57,31 @@ type ClusterConfigStatus struct {
 
 // ClusterConfig is the Schema for the clusterconfigs API
 type ClusterConfig struct {
-	APIVersion string `json:"apiVersion" validate:"eq=k0s.k0sproject.io/v1beta1"`
+	APIVersion string `json:"apiVersion" yaml:"apiVersion" validate:"eq=k0s.k0sproject.io/v1beta1"`
 
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec    *ClusterSpec        `json:"spec,omitempty"`
-	Status  ClusterConfigStatus `json:"status,omitempty"`
+	Spec    *ClusterSpec        `json:"spec,omitempty" yaml:"spec,omitempty"`
+	Status  ClusterConfigStatus `json:"status,omitempty" yaml:"status,omitempty"`
 	k0sVars constant.CfgVars
 }
 
 // InstallSpec defines the required fields for the `k0s install` command
 type InstallSpec struct {
-	SystemUsers *SystemUser `json:"users,omitempty"`
+	SystemUsers *SystemUser `json:"users,omitempty" yaml:"users,omitempty""`
 }
 
 // ControllerManagerSpec defines the fields for the ControllerManager
 type ControllerManagerSpec struct {
 	// Map of key-values (strings) for any extra arguments you want to pass down to the Kubernetes controller manager process
-	ExtraArgs map[string]string `json:"extraArgs,omitempty"`
+	ExtraArgs map[string]string `json:"extraArgs,omitempty" yaml:"extraArgs,omitempty"`
 }
 
 // SchedulerSpec defines the fields for the Scheduler
 type SchedulerSpec struct {
 	// Map of key-values (strings) for any extra arguments you want to pass down to Kubernetes scheduler process
-	ExtraArgs map[string]string `json:"extraArgs,omitempty"`
+	ExtraArgs map[string]string `json:"extraArgs,omitempty" yaml:"extraArgs,omitempty"`
 }
 
 //+kubebuilder:object:root=true
@@ -90,7 +90,7 @@ type SchedulerSpec struct {
 type ClusterConfigList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []ClusterConfig `json:"items"`
+	Items           []ClusterConfig `json:"items" yaml:"items"`
 }
 
 func init() {
