@@ -22,7 +22,7 @@ import (
 	utilnet "k8s.io/utils/net"
 )
 
-// var _ Validateable = (*Network)(nil)
+var _ Validateable = (*Network)(nil)
 
 // Network defines the network related config options
 type Network struct {

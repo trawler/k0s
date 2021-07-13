@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
 package v1beta1
 
 import (
@@ -69,7 +68,7 @@ type ClusterConfig struct {
 
 // InstallSpec defines the required fields for the `k0s install` command
 type InstallSpec struct {
-	SystemUsers *SystemUser `json:"users,omitempty" yaml:"users,omitempty""`
+	SystemUsers *SystemUser `json:"users,omitempty" yaml:"users,omitempty"`
 }
 
 // ControllerManagerSpec defines the fields for the ControllerManager
@@ -97,7 +96,7 @@ func init() {
 	SchemeBuilder.Register(&ClusterConfig{}, &ClusterConfigList{})
 }
 
-// var _ Validateable = (*ControllerManagerSpec)(nil)
+var _ Validateable = (*ControllerManagerSpec)(nil)
 
 // IsZero needed to omit empty object from yaml output
 func (c *ControllerManagerSpec) IsZero() bool {
@@ -185,22 +184,17 @@ func DefaultClusterSpec(k0sVars constant.CfgVars) *ClusterSpec {
 	}
 }
 
-/*
 func (c *ControllerManagerSpec) Validate() []error {
 	return nil
 }
 
-// var _ Validateable = (*SchedulerSpec)(nil)
-
-
-
+var _ Validateable = (*SchedulerSpec)(nil)
 
 func (s *SchedulerSpec) Validate() []error {
 	return nil
 }
 
-
-// var _ Validateable = (*InstallSpec)(nil)
+var _ Validateable = (*InstallSpec)(nil)
 
 // Validate stub for Validateable interface
 func (i *InstallSpec) Validate() []error {
@@ -208,6 +202,7 @@ func (i *InstallSpec) Validate() []error {
 }
 
 // Validateable interface to ensure that all config components implement Validate function
+// +k8s:deepcopy-gen=false
 type Validateable interface {
 	Validate() []error
 }
@@ -235,6 +230,3 @@ func (c *ClusterConfig) Validate() []error {
 func validateSpecs(v Validateable) []error {
 	return v.Validate()
 }
-
-
-*/

@@ -15,7 +15,7 @@ limitations under the License.
 */
 package v1beta1
 
-// var _ Validateable = (*ClusterExtensions)(nil)
+var _ Validateable = (*ClusterExtensions)(nil)
 
 // ClusterExtensions specifies cluster extensions
 type ClusterExtensions struct {

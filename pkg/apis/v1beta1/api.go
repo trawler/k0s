@@ -24,7 +24,7 @@ import (
 	"github.com/asaskevich/govalidator"
 )
 
-// var _ Validateable = (*APISpec)(nil)
+var _ Validateable = (*APISpec)(nil)
 
 // APISpec defines the settings for the K0s API
 type APISpec struct {

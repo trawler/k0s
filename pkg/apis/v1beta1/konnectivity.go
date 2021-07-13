@@ -16,7 +16,7 @@ limitations under the License.
 
 package v1beta1
 
-// var _ Validateable = (*KonnectivitySpec)(nil)
+var _ Validateable = (*KonnectivitySpec)(nil)
 
 // KonnectivitySpec defines the requested state for Konnectivity
 type KonnectivitySpec struct {

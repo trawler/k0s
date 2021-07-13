@@ -1,10 +1,9 @@
 package util
 
 import (
+	"gopkg.in/yaml.v2"
 	"regexp"
 	"strings"
-
-	"gopkg.in/yaml.v2"
 )
 
 var fieldNamePattern = regexp.MustCompile("field ([^ ]+)")
@@ -38,25 +37,4 @@ func YamlUnmarshalStrictIgnoringFields(in []byte, out interface{}, ignore []stri
 	}
 
 	return nil
-}
-
-// convert unstructuredYamlObject to Yaml.MapSlice
-func UnstructuredYamlToYamlSlice(object map[string]interface{}) yaml.MapSlice {
-	m := yaml.MapSlice{}
-
-	for k, v := range object {
-		m = append(m, yaml.MapItem{Key: k, Value: v})
-	}
-	return m
-}
-
-// convert Yaml.MapSlice to unstructuredYamlObject
-func YamlSliceToUnstructuredYaml(s yaml.MapSlice) map[string]interface{} {
-	obj := make(map[string]interface{})
-
-	for _, v := range s {
-		s := v.Key.(string)
-		obj[s] = v.Value
-	}
-	return obj
 }

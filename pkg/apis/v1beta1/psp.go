@@ -21,7 +21,7 @@ import (
 	"github.com/k0sproject/k0s/pkg/constant"
 )
 
-// var _ Validateable = (*PodSecurityPolicy)(nil)
+var _ Validateable = (*PodSecurityPolicy)(nil)
 
 // PodSecurityPolicy defines the config options for setting system level default PSP
 type PodSecurityPolicy struct {

@@ -17,11 +17,9 @@ package v1beta1
 
 import (
 	"fmt"
-
-	"gopkg.in/yaml.v2"
 )
 
-// var _ Validateable = (*WorkerProfiles)(nil)
+var _ Validateable = (*WorkerProfiles)(nil)
 
 // WorkerProfiles profiles collection
 type WorkerProfiles []WorkerProfile
@@ -46,6 +44,7 @@ type WorkerProfile struct {
 	Values `json:"values" yaml:"values"`
 }
 
+// +k8s:deepcopy-gen=false
 type Values map[string]interface{}
 
 var lockedFields = map[string]struct{}{
@@ -53,24 +52,6 @@ var lockedFields = map[string]struct{}{
 	"clusterDomain": {},
 	"apiVersion":    {},
 	"kind":          {},
-}
-
-func (in *WorkerProfile) DeepCopyInto(out *WorkerProfile) {
-	if in == nil {
-		return
-	}
-
-	b, err := yaml.Marshal(in.Values)
-	if err != nil {
-		return
-	}
-	var values Values
-
-	err = yaml.Unmarshal(b, &values)
-	if err != nil {
-		return
-	}
-	out.Values = values
 }
 
 // Validate validates instance
