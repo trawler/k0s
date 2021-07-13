@@ -56,10 +56,8 @@ type ClusterConfigStatus struct {
 
 // ClusterConfig is the Schema for the clusterconfigs API
 type ClusterConfig struct {
-	APIVersion string `json:"apiVersion" yaml:"apiVersion" validate:"eq=k0s.k0sproject.io/v1beta1"`
-
-	metav1.TypeMeta   `json:",inline"`
-	metav1.ObjectMeta `json:"metadata,omitempty"`
+	metav1.TypeMeta   `json:",inline" yaml:",inline"`
+	metav1.ObjectMeta `json:"metadata,inline,omitempty" yaml:"metadata,inline,omitempty"`
 
 	Spec    *ClusterSpec        `json:"spec,omitempty" yaml:"spec,omitempty"`
 	Status  ClusterConfigStatus `json:"status,omitempty" yaml:"status,omitempty"`
@@ -143,14 +141,18 @@ func configFromString(yml string, k0sVars constant.CfgVars) (*ClusterConfig, err
 // DefaultClusterConfig sets the default ClusterConfig values, when none are given
 func DefaultClusterConfig(k0sVars constant.CfgVars) *ClusterConfig {
 	return &ClusterConfig{
-		APIVersion: "k0s.k0sproject.io/v1beta1",
 		ObjectMeta: metav1.ObjectMeta{ClusterName: "k0s"},
-		Spec:       DefaultClusterSpec(k0sVars),
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "k0s.k0sproject.io/v1beta1",
+			Kind:       "Cluster",
+		},
+		Spec: DefaultClusterSpec(k0sVars),
 	}
 }
 
 // UnmarshalYAML sets in some sane defaults when unmarshaling the data from yaml
 func (c *ClusterConfig) UnmarshalYAML(unmarshal func(interface{}) error) error {
+	c.Kind = "Cluster"
 	c.ClusterName = "k0s"
 	c.Spec = DefaultClusterSpec(c.k0sVars)
 
